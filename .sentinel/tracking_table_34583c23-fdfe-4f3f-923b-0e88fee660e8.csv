@@ -1,2 +1,32 @@
 FileName, CommitSha
+analytics-rules/local-admin-group-changes.json,94b92d9a72f16fc390399ca93b3c37cbab5df7bd
+workbooks/workbook-signin-triage.json,3a6c35775f4561da0d2e108cb47d154df3e871c9
+analytics-rules/remote-file-creation-with-psexec.json,287f6df2723d68df2cbd0dbe595f2fdb7409e210
+analytics-rules/cross-tenant-access-settings-organization-inbound-collaborat.json,b140aacfd5b2e39e80a0e18624b0871498e53610
+analytics-rules/custom-detect-cowrie-attack.json,d83463a104a0e2a66710fe48c95e16de86ba2b10
+analytics-rules/afd-waf-path-traversal-attack.json,9c9d30c966e174f0a4cc09614fb8fb750b8437c3
+analytics-rules/probable-adfind-recon-tool-usage.json,abb5576b96b9ccb085ad2fb0dfff2fda12bf249f
+analytics-rules/imminent-ransomware.json,d755c7573c97cf9e639b3baaf095689d87961e72
+analytics-rules/attempts-to-sign-in-to-disabled-accounts.json,72903dcf293c78fa3e6455cbb516b820bcf5cfb1
+analytics-rules/honeytokens-keyvault-honeytoken-key-accessed.json,5779d8e2dae7ab032e6d68fb15d8f9fab3cd4452
+analytics-rules/suspicious-application-consent-for-offline-access.json,a30c9830a4dcbe4247d3fb29dcadc85980322027
+analytics-rules/nrt-first-access-credential-added-to-application-or-service.json,5e3eaf0f00642a5eb4a583cbf9e30900df8256ab
+analytics-rules/afd-waf-code-injection.json,cfcb6204b8cca6ce202e17a65e13c6ebee05935a
+analytics-rules/office-apps-launching-wscipt.json,addab9139ea1b0c7d3b109c7b51df15aaf417378
+analytics-rules/unusual-volume-of-file-deletion-by-users.json,4e24da41aaf234c2aac0ff12390cba1466a504a8
+analytics-rules/c2-namedpipe.json,37c9a2802e2be14de42bcc5704647d0902914d74
+analytics-rules/anomaly-in-smb-traffic-asim-network-session-schema.json,e94cf91a86a6270ba350da683ba4be5c2504b82c
+parsers/parser-signin-events-basic.json,04ffea8c7839c3e765cf48c497011e308d477049
+analytics-rules/possible-aitm-phishing-attempt-against-microsoft-entra-id.json,c5aeb11dbc7009c0c7038cf8ed20e6b2de923b5d
+hunting-queries/hunting-multi-country-signins.json,f1dbd749b920909abd64b330ec16fcf2b061c639
+analytics-rules/honeytokens-keyvault-honeytoken-secret-accessed.json,bbdf8747b6cb8b03d9164f2f4c08692e23974827
+analytics-rules/rare-subscription-level-operations.json,5c0d1ffe676bbcd4ca07cec4d096592742e0ded7
+playbooks/playbook-incident-webhook-sample.json,773f6f39a508114e756ff6085943543f643c415d
+analytics-rules/honeytokens-keyvault-honeytoken-diagnostic-settings-deleted.json,8fd74e11ca3e56ecbb04753d3b431bc85b254ec5
+analytics-rules/correlate-unfamiliar-sign-in-properties-atypical-travel-aler.json,b3dd305fcdfd9bca5e3f199942c14eaf860dc6f1
+analytics-rules/new-onmicrosoft-domain-added-to-tenant.json,b571e7c155865053efe23e8a59b9da3e9e968745
+analytics-rules/mfa-spamming-followed-by-successful-login.json,f826bbba457adb19f2c2848c56d2c66712017f8f
+analytics-rules/service-accounts-performing-remote-ps.json,80e7100ab31e2f58a07168b514793cdbe821552b
+analytics-rules/bulk-changes-to-privileged-account-permissions.json,2f450bd43a8f11d5493c254724137d23388d2d1e
+analytics-rules/microsoft-entra-id-powershell-accessing-non-entra-id-resourc.json,32b49a190d30ca398ae1f543a1b2c2bf5e276dc6
 
