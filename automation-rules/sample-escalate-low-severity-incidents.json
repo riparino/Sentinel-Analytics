@@ -1,0 +1,50 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "workspace": {
+      "type": "string"
+    }
+  },
+  "variables": {
+    "automationRuleId": "9c1f4a2e-3b7d-4e58-a6c9-1d2f8e4b7a30"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/automationRules",
+      "apiVersion": "2021-10-01-preview",
+      "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/', variables('automationRuleId'))]",
+      "properties": {
+        "displayName": "Sample - escalate Low severity incidents to High",
+        "order": 100,
+        "triggeringLogic": {
+          "isEnabled": false,
+          "triggersOn": "Incidents",
+          "triggersFilter": "Created",
+          "conditions": [
+            {
+              "conditionType": "Property",
+              "conditionProperties": {
+                "propertyName": "IncidentSeverity",
+                "operator": "Equals",
+                "propertyValues": [
+                  "Low"
+                ]
+              }
+            }
+          ]
+        },
+        "actions": [
+          {
+            "order": 1,
+            "actionType": "ModifyProperties",
+            "actionConfiguration": {
+              "severity": "High",
+              "status": "Active"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

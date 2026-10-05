@@ -1,0 +1,102 @@
+﻿{
+    "$schema":  "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion":  "1.0.0.0",
+    "parameters":  {
+                       "workspace":  {
+                                         "type":  "string"
+                                     }
+                   },
+    "resources":  [
+                      {
+                          "type":  "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+                          "apiVersion":  "2023-12-01-preview",
+                          "name":  "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/f3bdfef2-83ce-4e84-9a1d-f816a8c43f06')]",
+                          "kind":  "Scheduled",
+                          "properties":  {
+                                             "displayName":  "HoneyTokens: KeyVault HoneyToken key accessed",
+                                             "description":  "A honeytoken key-vault key was accessed",
+                                             "severity":  "Medium",
+                                             "enabled":  true,
+                                             "query":  "let timeframe=5m;\nlet fullAzureLogs = \n    (AzureDiagnostics\n    | union (print TimeGenerated=now(), ResourceType=\"\", OperationName=\"\", ResourceId=\"\", requestUri_s=\"\", \n    CallerIPAddress=\"\", identity_claim_http_schemas_microsoft_com_identity_claims_objectidentifier_g=\"\", \n    identity_claim_http_schemas_xmlsoap_org_ws_2005_05_identity_claims_name_s=\"\" | take 0))\n    | where TimeGenerated > ago(timeframe)\n    | where ResourceType == \"VAULTS\"\n    | where OperationName !in (\"KeyNearExpiryEventGridNotification\", \"KeyExpiredEventGridNotification\", \"KeyNewVersionEventGridNotification\", \"KeyBackup\", \"KeyCreate\", \"KeyList\", \"KeyRestore\", \"KeyResourcePut\", \"KeyResourceGet\", \"KeyResourceList\", \"KeyRecover\", \"KeyGetDeleted\")\n    | project ResourceId=toupper(ResourceId), requestUri_s, OperationName, CallerIPAddress\n        , AccountObjectId=identity_claim_http_schemas_microsoft_com_identity_claims_objectidentifier_g, AccountUPN=identity_claim_http_schemas_xmlsoap_org_ws_2005_05_identity_claims_name_s\n    | parse kind=regex flags=U requestUri_s with \"https://\" KVName \".vault.azure.net/keys/\" HoneyToken \"[?|/]\" *\n    | parse kind=regex requestUri_s with \"https://management.azure.com/\" * \"/providers/Microsoft.KeyVault/vaults/\" KVName2 \"/keys/\" HoneyToken2 \"[?|/]\" *   \n    | extend KVName=iff(isempty(KVName), KVName2, KVName), HoneyToken=toupper(iff(isempty(HoneyToken), HoneyToken2, HoneyToken));\n// basic alert on honeytoken access\nfullAzureLogs\n| join kind=inner (\n    (_GetWatchlist(\"HoneyTokens\") \n    | union (print ResourceProvider=\"\",ResourceId=\"\",HoneyToken=\"\",Properties=\"{}\" | take 0))\n    | where todynamic(Properties).Type == \"key\"\n    | extend ResourceId=toupper(ResourceId), HoneyToken=toupper(HoneyToken)\n    )\n    on ResourceId, HoneyToken\n| summarize make_set(OperationName) by ResourceId, HoneyToken, CallerIPAddress, AccountObjectId, AccountUPN\n// enrich with Account that accessed the KV at this time if available\n| join kind=leftouter (fullAzureLogs\n    | distinct ResourceId, AccountObjectId, AccountUPN\n    | where isnotempty(AccountObjectId))\n    on ResourceId\n| project ResourceId, HoneyToken, set_OperationName, CallerIPAddress, \n    AccountObjectId=iff(isempty(AccountObjectId), AccountObjectId1, AccountObjectId), \n    AccountUPN=iff(isempty(AccountUPN), AccountUPN1, AccountUPN)\n| extend AccountName=tostring(split(AccountUPN, \"@\")[0]), UPNSuffix=tostring(split(AccountUPN, \"@\")[1])\n| extend Severity=iff(set_OperationName contains \"/decrypt?\",\"High\", \"Medium\")",
+                                             "queryFrequency":  "PT5M",
+                                             "queryPeriod":  "PT5M",
+                                             "triggerOperator":  "GreaterThan",
+                                             "triggerThreshold":  0,
+                                             "suppressionDuration":  "PT5H",
+                                             "suppressionEnabled":  false,
+                                             "tactics":  [
+                                                             "Discovery"
+                                                         ],
+                                             "techniques":  [
+
+                                                            ],
+                                             "subTechniques":  [
+
+                                                               ],
+                                             "incidentConfiguration":  {
+                                                                           "createIncident":  true,
+                                                                           "groupingConfiguration":  {
+                                                                                                         "enabled":  true,
+                                                                                                         "reopenClosedIncident":  true,
+                                                                                                         "lookbackDuration":  "PT5H",
+                                                                                                         "matchingMethod":  "Selected",
+                                                                                                         "groupByEntities":  [
+                                                                                                                                 "AzureResource"
+                                                                                                                             ],
+                                                                                                         "groupByAlertDetails":  null,
+                                                                                                         "groupByCustomDetails":  null
+                                                                                                     }
+                                                                       },
+                                             "eventGroupingSettings":  {
+                                                                           "aggregationKind":  "AlertPerResult"
+                                                                       },
+                                             "alertDetailsOverride":  {
+                                                                          "alertDescriptionFormat":  "HoneyToken accessed. Operations: {{set_OperationName}}",
+                                                                          "alertSeverityColumnName":  "Severity"
+                                                                      },
+                                             "customDetails":  {
+                                                                   "HoneyTokenName":  "HoneyToken",
+                                                                   "OperationsPerformed":  "set_OperationName"
+                                                               },
+                                             "entityMappings":  [
+                                                                    {
+                                                                        "entityType":  "AzureResource",
+                                                                        "fieldMappings":  [
+                                                                                              {
+                                                                                                  "identifier":  "ResourceId",
+                                                                                                  "columnName":  "ResourceId"
+                                                                                              }
+                                                                                          ]
+                                                                    },
+                                                                    {
+                                                                        "entityType":  "IP",
+                                                                        "fieldMappings":  [
+                                                                                              {
+                                                                                                  "identifier":  "Address",
+                                                                                                  "columnName":  "CallerIPAddress"
+                                                                                              }
+                                                                                          ]
+                                                                    },
+                                                                    {
+                                                                        "entityType":  "Account",
+                                                                        "fieldMappings":  [
+                                                                                              {
+                                                                                                  "identifier":  "AadUserId",
+                                                                                                  "columnName":  "AccountObjectId"
+                                                                                              }
+                                                                                          ]
+                                                                    },
+                                                                    {
+                                                                        "entityType":  "Account",
+                                                                        "fieldMappings":  [
+                                                                                              {
+                                                                                                  "identifier":  "Name",
+                                                                                                  "columnName":  "AccountName"
+                                                                                              }
+                                                                                          ]
+                                                                    }
+                                                                ]
+                                         }
+                      }
+                  ]
+}

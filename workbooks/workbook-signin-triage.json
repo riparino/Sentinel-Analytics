@@ -1,0 +1,25 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Insights/workbooks",
+      "apiVersion": "2018-06-17-preview",
+      "name": "4e8b2f61-9a3c-4d7e-b1f5-8c2a6d3e9b74",
+      "location": "[resourceGroup().location]",
+      "kind": "shared",
+      "properties": {
+        "displayName": "Sign-in triage overview",
+        "version": "1.0",
+        "category": "workbook",
+        "sourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]",
+        "serializedData": "{\"version\":\"Notebook/1.0\",\"items\":[{\"type\":1,\"content\":{\"json\":\"## Sign-in triage overview\\nDaily baseline from **SigninLogs**. Use as the triage landing page; drill into the hunting queries for anomalies.\"},\"name\":\"text - 0\"},{\"type\":3,\"content\":{\"version\":\"KqlItem/1.0\",\"query\":\"SigninLogs\\n| summarize Signins = count(), Failed = countif(toint(ResultType) != 0), DistinctUsers = dcount(UserPrincipalName), Risky = countif(RiskLevelDuringSignIn in~ ('low','medium','high'))\\nby bin(TimeGenerated, 1d)\\n| order by TimeGenerated desc\",\"size\":0,\"queryType\":0,\"visualization\":\"table\",\"resourceType\":\"microsoft.operationalinsights/workspaces\"},\"name\":\"query - 1\"}],\"isLocked\":false,\"fallbackResourceIds\":[\"[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspace'))]\"]}"
+      }
+    }
+  ]
+}

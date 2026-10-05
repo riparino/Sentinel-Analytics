@@ -1,0 +1,92 @@
+﻿{
+    "$schema":  "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion":  "1.0.0.0",
+    "parameters":  {
+                       "workspace":  {
+                                         "type":  "string"
+                                     }
+                   },
+    "resources":  [
+                      {
+                          "type":  "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+                          "apiVersion":  "2023-12-01-preview",
+                          "name":  "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/63a8f3e9-4eca-4a6e-a112-4372487b5381')]",
+                          "kind":  "Scheduled",
+                          "properties":  {
+                                             "displayName":  "HoneyTokens: KeyVault HoneyToken diagnostic settings deleted or changed",
+                                             "description":  "This alert pops if any of the following two happen:\n1. diagnostic settings for a honey token keyvault is deleted.\n2. diagnostic settings  a honey token keyvault are changed such that \"AuditEvent\" is turned off.",
+                                             "severity":  "High",
+                                             "enabled":  true,
+                                             "query":  "let timeframe=5m;\r\nAzureActivity | where TimeGenerated > ago(timeframe) | where ResourceProviderValue == \"MICROSOFT.KEYVAULT\"\r\n| extend d=parse_json(Properties)\r\n| extend requestBodyProperties=parse_json(tostring(d.requestbody)).properties\r\n| extend logs=parse_json(tostring(requestBodyProperties)).logs\r\n| where todynamic(Properties).message == \"microsoft.insights/diagnosticSettings/delete\" or (logs[0].category == \"AuditEvent\" and logs[0].enabled == false)\r\n| project-away d, requestBodyProperties, logs\r\n| parse kind=regex todynamic(Properties).entity with \"/subscriptions/\" * \"/resourceGroups/\" * \"/providers/Microsoft.KeyVault/vaults/\" keyvault \"/providers/microsoft.insights/diagnosticSettings/\" diagnosticSettingsName | extend keyvault, diagnosticSettingsName\r\n| join kind=inner (_GetWatchlist('HoneyTokens') | union (print ResourceProvider=\"dummy\", ResourceId=\"dummy\", HoneyToken=\"dummy\")\r\n| parse kind=regex ResourceId with \"/subscriptions/\" * \"/resourceGroups/\" * \"/providers/Microsoft.KeyVault/vaults/\" keyvault\r\n| distinct keyvault) on keyvault\r\n| extend ResourceId = _ResourceId, AccountUPN = Caller | extend AccountName = tostring(split(AccountUPN, '@')[0]), UPNSuffix=tostring(split(AccountUPN, '@')[1]), Severity=\"High\", AccountObjectId=todynamic(Claims)['http://schemas.microsoft.com/identity/claims/objectidentifier']",
+                                             "queryFrequency":  "PT5M",
+                                             "queryPeriod":  "PT5M",
+                                             "triggerOperator":  "GreaterThan",
+                                             "triggerThreshold":  0,
+                                             "suppressionDuration":  "PT5H",
+                                             "suppressionEnabled":  false,
+                                             "tactics":  [
+                                                             "DefenseEvasion"
+                                                         ],
+                                             "techniques":  [
+
+                                                            ],
+                                             "subTechniques":  [
+
+                                                               ],
+                                             "incidentConfiguration":  {
+                                                                           "createIncident":  true,
+                                                                           "groupingConfiguration":  {
+                                                                                                         "enabled":  true,
+                                                                                                         "reopenClosedIncident":  true,
+                                                                                                         "lookbackDuration":  "PT5H",
+                                                                                                         "matchingMethod":  "AllEntities",
+                                                                                                         "groupByEntities":  null,
+                                                                                                         "groupByAlertDetails":  null,
+                                                                                                         "groupByCustomDetails":  null
+                                                                                                     }
+                                                                       },
+                                             "eventGroupingSettings":  {
+                                                                           "aggregationKind":  "SingleAlert"
+                                                                       },
+                                             "entityMappings":  [
+                                                                    {
+                                                                        "entityType":  "AzureResource",
+                                                                        "fieldMappings":  [
+                                                                                              {
+                                                                                                  "identifier":  "ResourceId",
+                                                                                                  "columnName":  "ResourceId"
+                                                                                              }
+                                                                                          ]
+                                                                    },
+                                                                    {
+                                                                        "entityType":  "IP",
+                                                                        "fieldMappings":  [
+                                                                                              {
+                                                                                                  "identifier":  "Address",
+                                                                                                  "columnName":  "CallerIpAddress"
+                                                                                              }
+                                                                                          ]
+                                                                    },
+                                                                    {
+                                                                        "entityType":  "Account",
+                                                                        "fieldMappings":  [
+                                                                                              {
+                                                                                                  "identifier":  "AadUserId",
+                                                                                                  "columnName":  "AccountObjectId"
+                                                                                              }
+                                                                                          ]
+                                                                    },
+                                                                    {
+                                                                        "entityType":  "Account",
+                                                                        "fieldMappings":  [
+                                                                                              {
+                                                                                                  "identifier":  "Name",
+                                                                                                  "columnName":  "AccountName"
+                                                                                              }
+                                                                                          ]
+                                                                    }
+                                                                ]
+                                         }
+                      }
+                  ]
+}

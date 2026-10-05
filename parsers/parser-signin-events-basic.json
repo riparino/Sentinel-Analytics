@@ -1,0 +1,24 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+      "apiVersion": "2020-08-01",
+      "name": "[concat(parameters('workspace'), '/ParserSigninEventsBasic')]",
+      "properties": {
+        "category": "Custom Functions",
+        "displayName": "SigninEventsBasic parser",
+        "description": "Flattens SigninLogs into a stable column set for triage queries. Call it as: SigninEventsBasic()",
+        "functionAlias": "SigninEventsBasic",
+        "query": "SigninLogs\n| project TimeGenerated, UserPrincipalName, UserId, IPAddress, Location, ResultType, ResultDescription, AppDisplayName, ClientAppUsed, AuthenticationRequirement, RiskLevelDuringSignIn\n| extend Success = toint(ResultType) == 0",
+        "version": 1
+      }
+    }
+  ]
+}

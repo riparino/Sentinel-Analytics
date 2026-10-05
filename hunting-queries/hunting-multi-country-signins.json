@@ -1,0 +1,23 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/savedSearches",
+      "apiVersion": "2020-08-01",
+      "name": "[concat(parameters('workspace'), '/HuntingMultiCountrySigninsOneHour')]",
+      "properties": {
+        "category": "Hunting Queries",
+        "displayName": "User signed in from multiple countries within one hour",
+        "description": "Interactive successful sign-ins grouped per user per hour where more than one country was observed. VPN/roaming users will trip this - baseline them first.",
+        "query": "SigninLogs\n| where TimeGenerated > ago(1d)\n| where ResultType == \"0\"\n| summarize Signins = count(), Countries = make_set(Location), DistinctIPs = dcount(IPAddress) by UserPrincipalName, bin(TimeGenerated, 1h)\n| where array_length(Countries) > 1\n| project TimeGenerated, UserPrincipalName, Signins, Countries, DistinctIPs",
+        "version": 1
+      }
+    }
+  ]
+}

@@ -1,0 +1,76 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "playbookName": {
+      "type": "string",
+      "defaultValue": "Sentinel-Incident-Webhook-Sample"
+    },
+    "webhookUrl": {
+      "type": "string",
+      "defaultValue": "https://example.com/webhook",
+      "metadata": {
+        "description": "Destination that receives incident details. Replace with your Teams webhook / SOAR endpoint."
+      }
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Logic/workflows",
+      "apiVersion": "2019-05-01",
+      "name": "[parameters('playbookName')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "state": "Enabled",
+        "definition": {
+          "$schema": "https://schema.management.azure.com/schemas/2016-06-01/Microsoft.Logic.json",
+          "contentVersion": "1.0.0.0",
+          "parameters": {
+            "$connections": {
+              "defaultValue": {},
+              "type": "Object"
+            },
+            "webhookUrl": {
+              "defaultValue": "[parameters('webhookUrl')]",
+              "type": "String"
+            }
+          },
+          "triggers": {
+            "When_a_Microsoft_Sentinel_incident_is_created": {
+              "type": "ApiConnectionWebhook",
+              "inputs": {
+                "body": {
+                  "callback_url": "@{listCallbackUrl()}"
+                },
+                "host": {
+                  "connection": {
+                    "name": "@parameters('$connections')['azuresentinel']['connectionId']"
+                  }
+                },
+                "path": "/incident-creation-callback"
+              }
+            }
+          },
+          "actions": {
+            "Forward_incident_details": {
+              "runAfter": {},
+              "type": "Http",
+              "inputs": {
+                "method": "POST",
+                "uri": "@{parameters('webhookUrl')}",
+                "body": {
+                  "incidentNumber": "@{triggerBody()?['object']?['properties']?['incidentNumber']}",
+                  "title": "@{triggerBody()?['object']?['properties']?['title']}",
+                  "severity": "@{triggerBody()?['object']?['properties']?['severity']}",
+                  "status": "@{triggerBody()?['object']?['properties']?['status']}",
+                  "incidentArmId": "@{triggerBody()?['object']?['id']}"
+                }
+              }
+            }
+          },
+          "outputs": {}
+        }
+      }
+    }
+  ]
+}

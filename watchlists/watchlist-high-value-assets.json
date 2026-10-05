@@ -1,0 +1,46 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "workspace": {
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.OperationalInsights/workspaces/providers/watchlists",
+      "apiVersion": "2020-12-01-preview",
+      "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/HighValueAssets')]",
+      "properties": {
+        "displayName": "High value assets",
+        "description": "Identities whose compromise warrants immediate escalation. Referenced in triage queries via _GetWatchlist('HighValueAssets').",
+        "provider": "Microsoft",
+        "source": "Local file",
+        "itemsSearchKey": "UserPrincipalName",
+        "items": [
+          {
+            "properties": {
+              "UserPrincipalName": "admin@example.com",
+              "Department": "IT",
+              "Reason": "Privileged account - Global Admin"
+            }
+          },
+          {
+            "properties": {
+              "UserPrincipalName": "cfo@example.com",
+              "Department": "Finance",
+              "Reason": "BEC target"
+            }
+          },
+          {
+            "properties": {
+              "UserPrincipalName": "pki-admin@example.com",
+              "Department": "IT",
+              "Reason": "Certificate authority control"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
