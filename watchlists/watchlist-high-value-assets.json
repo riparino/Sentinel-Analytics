@@ -9,7 +9,7 @@
   "resources": [
     {
       "type": "Microsoft.OperationalInsights/workspaces/providers/watchlists",
-      "apiVersion": "2020-12-01-preview",
+      "apiVersion": "2021-04-01",
       "name": "[concat(parameters('workspace'), '/Microsoft.SecurityInsights/HighValueAssets')]",
       "properties": {
         "displayName": "High value assets",
@@ -17,29 +17,9 @@
         "provider": "Microsoft",
         "source": "Local file",
         "itemsSearchKey": "UserPrincipalName",
-        "items": [
-          {
-            "properties": {
-              "UserPrincipalName": "admin@example.com",
-              "Department": "IT",
-              "Reason": "Privileged account - Global Admin"
-            }
-          },
-          {
-            "properties": {
-              "UserPrincipalName": "cfo@example.com",
-              "Department": "Finance",
-              "Reason": "BEC target"
-            }
-          },
-          {
-            "properties": {
-              "UserPrincipalName": "pki-admin@example.com",
-              "Department": "IT",
-              "Reason": "Certificate authority control"
-            }
-          }
-        ]
+        "contentType": "text/csv",
+        "numberOfLinesToSkip": 0,
+        "rawContent": "UserPrincipalName,Department,Reason\nadmin@example.com,IT,Privileged account - Global Admin\ncfo@example.com,Finance,BEC target\npki-admin@example.com,IT,Certificate authority control"
       }
     }
   ]

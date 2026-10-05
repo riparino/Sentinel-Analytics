@@ -20,7 +20,7 @@
         "triggeringLogic": {
           "isEnabled": false,
           "triggersOn": "Incidents",
-          "triggersFilter": "Created",
+          "triggersWhen": "Created",
           "conditions": [
             {
               "conditionType": "Property",
