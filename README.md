@@ -7,9 +7,8 @@ Microsoft Sentinel content repo wired to Sentinel's native GitHub CI/CD ("Reposi
 | sourceControlId | Workspace | Resource group | Content types | Workflow |
 | --- | --- | --- | --- | --- |
 | `34583c23-fdfe-4f3f-923b-0e88fee660e8` | `log-sentinel-cus` (Central US) | `rg-sentinel` | AnalyticsRule, AutomationRule, HuntingQuery, Parser, Playbook, Workbook, Watchlist | `.github/workflows/sentinel-deploy-34583c23-*.yml` |
-| `b8a9b2ba-0a14-4777-ae8d-d7a950b41072` | `log-sentinel-wus2` (West US 2) | `rg-sentinel-wus2` | AnalyticsRule only | `.github/workflows/sentinel-deploy-b8a9b2ba-*.yml` |
 
-**Both connections scan the entire repo.** A JSON template deploys to every connection whose `contentTypes` includes its resource type — an analytics rule deploys to *both* workspaces, a workbook only to `log-sentinel-cus`. Scope per workspace with `paths:` filters in the workflow YAML or an exclude list in `sentinel-deployment.config` (see below).
+A single repository connection. Every content template in this repo deploys to `log-sentinel-cus` on push to `main`. (A second connection to `log-sentinel-wus2` was removed 2026-10-04 along with its workflow pair, tracking CSV, and stale 2022-era credential secret — that workspace is decommissioned.)
 
 ## How deployment works
 
